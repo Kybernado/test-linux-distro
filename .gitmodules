@@ -1,0 +1,9 @@
+[submodule "glibc"]
+	path = glibc
+	url = git@github.com:Kybernado/glibc.git
+[submodule "kernel"]
+	path = kernel
+	url = https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
+[submodule "progs/coreutils"]
+	path = progs/coreutils
+	url = git://git.sv.gnu.org/coreutils
