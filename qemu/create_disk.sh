@@ -80,6 +80,8 @@ check_for_error 1 "Failed to mount disk image." "Disk image mounted successfully
 cd $FOLDER
 echo "Copying files to disk..."
 cp -r ./* /mnt/
+chown root:root /mnt/*
+chmod u+s /mnt/bin/su /mnt/bin/mount /mnt/bin/umount
 check_for_error 0 "There was an error while copying files to disk image." "Successfully copied all files."
 cd ..
 

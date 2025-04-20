@@ -7,3 +7,33 @@
 [submodule "progs/coreutils"]
 	path = progs/coreutils
 	url = git://git.sv.gnu.org/coreutils
+[submodule "libs/readline"]
+	path = libs/readline
+	url = https://git.savannah.gnu.org/git/readline.git/
+[submodule "libs/ncurses"]
+	path = libs/ncurses
+	url = https://github.com/mirror/ncurses
+[submodule "libs/zlib"]
+	path = libs/zlib
+	url = https://github.com/madler/zlib
+[submodule "libs/zstd"]
+	path = libs/zstd
+	url = https://github.com/facebook/zstd
+[submodule "libs/attr"]
+	path = libs/attr
+	url = https://git.savannah.nongnu.org/git/attr.git
+[submodule "libs/libcap"]
+	path = libs/libcap
+	url = https://git.kernel.org/pub/scm/libs/libcap/libcap.git
+[submodule "progs/bash"]
+	path = progs/bash
+	url = https://git.savannah.gnu.org/git/bash.git/
+[submodule "libs/acl"]
+	path = libs/acl
+	url = https://git.savannah.nongnu.org/git/acl.git
+[submodule "progs/util-linux"]
+	path = progs/util-linux
+	url = https://github.com/util-linux/util-linux.git
+[submodule "sinit"]
+	path = sinit
+	url = git://git.suckless.org/sinit

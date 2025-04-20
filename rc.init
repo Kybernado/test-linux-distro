@@ -1,0 +1,6 @@
+#!/bin/bash
+mount -t devtmpfs none /dev
+mount -t proc none /proc
+mount -t sysfs none /sys
+echo "Welcome to my Distro!"
+exec /bin/bash < /dev/ttyS0 > /dev/ttyS0 2>&1

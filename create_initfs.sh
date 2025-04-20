@@ -29,10 +29,10 @@ mkdir -p usr/games
 mkdir -p usr/include
 mkdir -p usr/share
 mkdir -p usr/src
+mkdir -p usr/local
 
-ln -sf /lib lib64
-ln -sf /bin usr/bin
-ln -sf /lib usr/lib
-ln -sf /lib usr/lib64
-ln -sf /sbin usr/sbin
-
+ln -sf lib lib64
+ln -sf ../lib usr/lib
+ln -sf ../lib usr/lib64
+ln -sf ../bin usr/bin
+ln -sf ../sbin usr/sbin

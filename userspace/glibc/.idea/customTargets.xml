@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CLionExternalBuildManager">
+    <target id="30c701ad-c05e-43a4-9469-cb4afa9b5cf2" name="glibc-build" defaultType="MAKE">
+      <configuration id="e1b85c08-2517-42bd-89d0-4ba013b8de1a" name="glibc-build">
+        <build type="MAKE">
+          <make targetName="; cd /home/ArrayON_56/Desktop/test-linux-distro/build/glibc/ &amp;&amp; make -j$(nproc)" />
+        </build>
+        <clean type="MAKE">
+          <make targetName="make clean" />
+        </clean>
+      </configuration>
+    </target>
+  </component>
+</project>
