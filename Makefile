@@ -68,6 +68,10 @@ UTILLINUX_BUILD_DIR = $(USERSPACE_BUILD_DIR)/util-linux/build
 UTILLINUX_INSTALL_DIR = $(USERSPACE_BUILD_DIR)/util-linux/install
 UTILLINUX_SOURCE_DIR = $(abspath $(USERSPACE_SOURCE_DIR)/util-linux)
 
+TESTPROG_BUILD_DIR = $(BUILD_DIR)/testprog/build
+TESTPROG_INSTALL_DIR = $(BUILD_DIR)/testprog/install
+TESTPROG_SOURCE_DIR = $(abspath testprog)
+
 QEMU_PAIR_DIR = $(BUILD_DIR)/qemu_pair
 DOCKER_IMAGE_DIR = $(BUILD_DIR)/docker_image
 
@@ -105,6 +109,7 @@ build-userspace:
 	$(MKDIR) -p $(BASH_BUILD_DIR) $(BASH_INSTALL_DIR)
 	$(MKDIR) -p $(COREUTILS_BUILD_DIR) $(COREUTILS_INSTALL_DIR)
 	$(MKDIR) -p $(UTILLINUX_BUILD_DIR) $(UTILLINUX_INSTALL_DIR)
+	$(MKDIR) -p $(TESTPROG_BUILD_DIR) $(TESTPROG_INSTALL_DIR)
 	
 	# sinit
 	$(CP) -r $(SINIT_SOURCE_DIR)/* $(SINIT_BUILD_DIR)/
@@ -293,6 +298,13 @@ build-userspace:
 	# links and init script
 	ln -sf $(abspath $(INITFS_DIR))/bin/bash $(abspath $(INITFS_DIR))/bin/sh
 	$(CP) rc.init $(INITFS_DIR)/bin/rc.init
+	
+	# my testing program
+	$(CP) -r $(TESTPROG_SOURCE_DIR)/* $(TESTPROG_BUILD_DIR)/
+	$(MAKE) -C $(TESTPROG_BUILD_DIR)
+	$(MAKE) -C $(TESTPROG_BUILD_DIR) install DESTDIR=$(abspath $(TESTPROG_INSTALL_DIR))
+	$(CP) -r $(TESTPROG_INSTALL_DIR)/* $(INITFS_DIR)/home
+	
 	
 build: build-kernel build-userspace
 

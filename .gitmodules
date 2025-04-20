@@ -1,39 +1,36 @@
-[submodule "glibc"]
-	path = glibc
+[submodule "userspace/glibc"]
+	path = userspace/glibc
 	url = git@github.com:Kybernado/glibc.git
-[submodule "kernel"]
-	path = kernel
-	url = https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
-[submodule "progs/coreutils"]
-	path = progs/coreutils
-	url = git://git.sv.gnu.org/coreutils
-[submodule "libs/readline"]
-	path = libs/readline
+[submodule "userspace/readline"]
+	path = userspace/readline
 	url = https://git.savannah.gnu.org/git/readline.git/
-[submodule "libs/ncurses"]
-	path = libs/ncurses
+[submodule "userspace/ncurses"]
+	path = userspace/ncurses
 	url = https://github.com/mirror/ncurses
-[submodule "libs/zlib"]
-	path = libs/zlib
+[submodule "userspace/zlib"]
+	path = userspace/zlib
 	url = https://github.com/madler/zlib
-[submodule "libs/zstd"]
-	path = libs/zstd
+[submodule "userspace/zstd"]
+	path = userspace/zstd
 	url = https://github.com/facebook/zstd
-[submodule "libs/attr"]
-	path = libs/attr
+[submodule "userspace/attr"]
+	path = userspace/attr
 	url = https://git.savannah.nongnu.org/git/attr.git
-[submodule "libs/libcap"]
-	path = libs/libcap
+[submodule "userspace/libcap"]
+	path = userspace/libcap
 	url = https://git.kernel.org/pub/scm/libs/libcap/libcap.git
-[submodule "progs/bash"]
-	path = progs/bash
+[submodule "userspace/bash"]
+	path = userspace/bash
 	url = https://git.savannah.gnu.org/git/bash.git/
-[submodule "libs/acl"]
-	path = libs/acl
+[submodule "userspace/acl"]
+	path = userspace/acl
 	url = https://git.savannah.nongnu.org/git/acl.git
-[submodule "progs/util-linux"]
-	path = progs/util-linux
+[submodule "userspace/util-linux"]
+	path = userspace/util-linux
 	url = https://github.com/util-linux/util-linux.git
-[submodule "sinit"]
-	path = sinit
+[submodule "userspace/sinit"]
+	path = userspace/sinit
 	url = git://git.suckless.org/sinit
+[submodule "userspace/coreutils"]
+	path = userspace/coreutils
+	url = git://git.sv.gnu.org/coreutils
