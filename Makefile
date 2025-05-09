@@ -28,6 +28,10 @@ GLIBC_BUILD_DIR = $(USERSPACE_BUILD_DIR)/glibc/build
 GLIBC_INSTALL_DIR = $(USERSPACE_BUILD_DIR)/glibc/install
 GLIBC_SOURCE_DIR = $(abspath $(USERSPACE_SOURCE_DIR)/glibc)
 
+BZIP2_BUILD_DIR = $(USERSPACE_BUILD_DIR)/bzip2/build
+BZIP2_INSTALL_DIR = $(USERSPACE_BUILD_DIR)/bzip2/install
+BZIP2_SOURCE_DIR = $(abspath $(USERSPACE_SOURCE_DIR)/bzip2)
+
 READLINE_BUILD_DIR = $(USERSPACE_BUILD_DIR)/readline/build
 READLINE_INSTALL_DIR = $(USERSPACE_BUILD_DIR)/readline/install
 READLINE_SOURCE_DIR = $(abspath $(USERSPACE_SOURCE_DIR)/readline)
@@ -68,6 +72,14 @@ UTILLINUX_BUILD_DIR = $(USERSPACE_BUILD_DIR)/util-linux/build
 UTILLINUX_INSTALL_DIR = $(USERSPACE_BUILD_DIR)/util-linux/install
 UTILLINUX_SOURCE_DIR = $(abspath $(USERSPACE_SOURCE_DIR)/util-linux)
 
+GCC_BUILD_DIR = $(USERSPACE_BUILD_DIR)/gcc/build
+GCC_INSTALL_DIR = $(USERSPACE_BUILD_DIR)/gcc/install
+GCC_SOURCE_DIR = $(abspath $(USERSPACE_SOURCE_DIR)/gcc)
+
+UPM_BUILD_DIR = $(USERSPACE_BUILD_DIR)/upm/build
+UPM_INSTALL_DIR = $(USERSPACE_BUILD_DIR)/upm/install
+UPM_SOURCE_DIR = $(abspath $(USERSPACE_SOURCE_DIR)/upm)
+
 TESTPROG_BUILD_DIR = $(BUILD_DIR)/testprog/build
 TESTPROG_INSTALL_DIR = $(BUILD_DIR)/testprog/install
 TESTPROG_SOURCE_DIR = $(abspath testprog)
@@ -99,6 +111,7 @@ build-userspace:
 	$(MKDIR) -p $(USERSPACE_BUILD_DIR)
 	$(MKDIR) -p $(SINIT_BUILD_DIR) $(SINIT_INSTALL_DIR)
 	$(MKDIR) -p $(GLIBC_BUILD_DIR) $(GLIBC_INSTALL_DIR)
+	$(MKDIR) -p $(BZIP2_BUILD_DIR) $(BZIP2_INSTALL_DIR)
 	$(MKDIR) -p $(READLINE_BUILD_DIR) $(READLINE_INSTALL_DIR)
 	$(MKDIR) -p $(ZLIB_BUILD_DIR) $(ZLIB_INSTALL_DIR)
 	$(MKDIR) -p $(NCURSES_BUILD_DIR) $(NCURSES_INSTALL_DIR)
@@ -109,7 +122,10 @@ build-userspace:
 	$(MKDIR) -p $(BASH_BUILD_DIR) $(BASH_INSTALL_DIR)
 	$(MKDIR) -p $(COREUTILS_BUILD_DIR) $(COREUTILS_INSTALL_DIR)
 	$(MKDIR) -p $(UTILLINUX_BUILD_DIR) $(UTILLINUX_INSTALL_DIR)
+	$(MKDIR) -p $(GCC_BUILD_DIR) $(GCC_INSTALL_DIR)
+	$(MKDIR) -p $(UPM_BUILD_DIR) $(UPM_INSTALL_DIR)
 	$(MKDIR) -p $(TESTPROG_BUILD_DIR) $(TESTPROG_INSTALL_DIR)
+	
 	
 	# sinit
 	$(CP) -r $(SINIT_SOURCE_DIR)/* $(SINIT_BUILD_DIR)/
@@ -144,6 +160,25 @@ build-userspace:
 	$(MV) -f $(GLIBC_INSTALL_DIR)/share $(GLIBC_INSTALL_DIR)/usr/share
 	$(CP) -r $(GLIBC_INSTALL_DIR)/* $(INITFS_DIR)/
 	
+	# bzip2
+	$(CP) -r $(BZIP2_SOURCE_DIR)/* $(BZIP2_BUILD_DIR)/
+	$(MAKE) -C $(BZIP2_BUILD_DIR) -f Makefile-libbz2_so
+	$(MAKE) -C $(BZIP2_BUILD_DIR)
+	$(MAKE) -C $(BZIP2_BUILD_DIR) install PREFIX=$(abspath $(BZIP2_INSTALL_DIR))
+	$(MKDIR) -p $(BZIP2_INSTALL_DIR)/usr
+	if [ -d "$(BZIP2_INSTALL_DIR)/usr/man" ]; then \
+		rm -rf "$(BZIP2_INSTALL_DIR)/usr/man"; \
+	fi
+	$(MV) -f $(BZIP2_INSTALL_DIR)/man $(BZIP2_INSTALL_DIR)/usr/man
+	if [ -d "$(BZIP2_INSTALL_DIR)/usr/include" ]; then \
+		rm -rf "$(BZIP2_INSTALL_DIR)/usr/include"; \
+	fi
+	$(MV) -f $(BZIP2_INSTALL_DIR)/include $(BZIP2_INSTALL_DIR)/usr/include
+	$(CP) $(BZIP2_BUILD_DIR)/libbz2.so.1.0.8 $(BZIP2_INSTALL_DIR)/lib/libbz2.so.1.0.8
+	$(CP) $(BZIP2_BUILD_DIR)/libbz2.so.1.0 $(BZIP2_INSTALL_DIR)/lib/libbz2.so.1.0
+	$(CP) $(BZIP2_BUILD_DIR)/bzip2-shared $(BZIP2_INSTALL_DIR)/bin/bzip2-shared
+	$(CP) -r $(BZIP2_INSTALL_DIR)/* $(INITFS_DIR)/
+	
 	# readline
 	$(CD) $(READLINE_BUILD_DIR) && $(READLINE_SOURCE_DIR)/configure --prefix=/
 	$(MAKE) -C $(READLINE_BUILD_DIR)
@@ -175,18 +210,9 @@ build-userspace:
 	$(CP) -r $(ZLIB_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# ncurses
-	$(CD) $(NCURSES_BUILD_DIR) && $(NCURSES_SOURCE_DIR)/configure --prefix=/ --with-shared --without-debug --enable-widec --with-versioned-syms --with-shlib-version=rel
-	$(MAKE) -C $(NCURSES_BUILD_DIR)
+	$(CD) $(NCURSES_BUILD_DIR) && $(NCURSES_SOURCE_DIR)/configure --prefix=/usr --exec-prefix=/ --without-ada --with-shared --without-debug --enable-widec --with-versioned-syms --with-shlib-version=rel --without-cxx
+	$(MAKE) -C $(NCURSES_BUILD_DIR) all
 	$(MAKE) -C $(NCURSES_BUILD_DIR) install DESTDIR=$(abspath $(NCURSES_INSTALL_DIR))
-	$(MKDIR) -p $(NCURSES_INSTALL_DIR)/usr
-	if [ -d "$(NCURSES_INSTALL_DIR)/usr/include" ]; then \
-		rm -rf "$(NCURSES_INSTALL_DIR)/usr/include"; \
-	fi
-	$(MV) -f $(NCURSES_INSTALL_DIR)/include $(NCURSES_INSTALL_DIR)/usr/include 
-	if [ -d "$(NCURSES_INSTALL_DIR)/usr/share" ]; then \
-		rm -rf "$(NCURSES_INSTALL_DIR)/usr/share"; \
-	fi
-	$(MV) -f $(NCURSES_INSTALL_DIR)/share $(NCURSES_INSTALL_DIR)/usr/share
 	$(CP) -r $(NCURSES_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# attr
@@ -225,7 +251,7 @@ build-userspace:
 	$(CP) -r $(ZSTD_SOURCE_DIR)/* $(ZSTD_BUILD_DIR)
 	$(MAKE) -C $(ZSTD_BUILD_DIR)
 	$(MAKE) -C $(ZSTD_BUILD_DIR) PREFIX=/ install DESTDIR=$(abspath $(ZSTD_INSTALL_DIR))
-	$(MKDIR) -p $(ZSTD_INSTALL_DIR)/usr
+	$(MKDIR) -p $(ZSTD_INSTALL_DIR)/usr 
 	if [ -d "$(ZSTD_INSTALL_DIR)/usr/include" ]; then \
 		rm -rf "$(ZSTD_INSTALL_DIR)/usr/include"; \
 	fi
@@ -247,19 +273,10 @@ build-userspace:
 	$(CP) -r $(LIBCAP_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# bash
-	$(CD) $(BASH_BUILD_DIR) && $(BASH_SOURCE_DIR)/configure --prefix=/ --disable-rpath --enable-readline
-	$(MAKE) -C $(BASH_BUILD_DIR)
+	$(CD) $(BASH_BUILD_DIR) && $(BASH_SOURCE_DIR)/configure --prefix=/usr --exec-prefix=/ --disable-rpath --enable-readline
+	$(MAKE) -C $(BASH_BUILD_DIR) CC=/bin/gcc-12
 	$(MAKE) -C $(BASH_BUILD_DIR) install DESTDIR=$(abspath $(BASH_INSTALL_DIR))
 	$(CHMOD) +w $(BASH_INSTALL_DIR)/bin/bashbug
-	$(MKDIR) -p $(BASH_INSTALL_DIR)/usr
-	if [ -d "$(BASH_INSTALL_DIR)/usr/include" ]; then \
-		rm -rf "$(BASH_INSTALL_DIR)/usr/include"; \
-	fi
-	$(MV) -f $(BASH_INSTALL_DIR)/include $(BASH_INSTALL_DIR)/usr/include
-	if [ -d "$(BASH_INSTALL_DIR)/usr/share" ]; then \
-		rm -rf "$(BASH_INSTALL_DIR)/usr/share"; \
-	fi
-	$(MV) -f $(BASH_INSTALL_DIR)/share $(BASH_INSTALL_DIR)/usr/share
 	$(CP) -r $(BASH_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# coreutils
@@ -295,6 +312,18 @@ build-userspace:
 	$(RM) -rf $(UTILLINUX_INSTALL_DIR)/usr/lib
 	$(CP) -r $(UTILLINUX_INSTALL_DIR)/* $(INITFS_DIR)/
 	
+	# gcc
+	./gcc_change_path_for_x86_64.sh $(GCC_SOURCE_DIR)
+	$(CD) $(GCC_BUILD_DIR) && $(GCC_SOURCE_DIR)/configure --prefix=/usr --exec-prefix=/ --disable-multilib --with-system-zlib --enable-default-pie --enable-default-ssp --enable-host-pie --disable-fixincludes --enable-languages=c,c++,fortran,go,objc,obj-c++,m2
+	$(MAKE) -C $(GCC_BUILD_DIR)
+	$(MAKE) -C $(GCC_BUILD_DIR) install DESTDIR=$(abspath $(GCC_INSTALL_DIR))
+	$(CP) -r $(GCC_INSTALL_DIR)/* $(INITFS_DIR)/
+	
+	# upm
+	$(CP) -r $(UPM_SOURCE_DIR)/* $(UPM_BUILD_DIR)/
+	$(CD) $(UPM_BUILD_DIR) && cargo build --release
+	$(CP) $(UPM_BUILD_DIR)/target/release/upm $(INITFS_DIR)/bin
+	
 	# links and init script
 	ln -sf $(abspath $(INITFS_DIR))/bin/bash $(abspath $(INITFS_DIR))/bin/sh
 	$(CP) rc.init $(INITFS_DIR)/bin/rc.init
@@ -303,7 +332,11 @@ build-userspace:
 	$(CP) -r $(TESTPROG_SOURCE_DIR)/* $(TESTPROG_BUILD_DIR)/
 	$(MAKE) -C $(TESTPROG_BUILD_DIR)
 	$(MAKE) -C $(TESTPROG_BUILD_DIR) install DESTDIR=$(abspath $(TESTPROG_INSTALL_DIR))
-	$(CP) -r $(TESTPROG_INSTALL_DIR)/* $(INITFS_DIR)/home
+	$(CP) -r $(TESTPROG_INSTALL_DIR)/* $(INITFS_DIR)/opt
+	$(LN) -sf $ ../opt/testprog/prog $(INITFS_DIR)/bin/prog
+	
+	$(CP) testprog-1.0.0.upkg $(INITFS_DIR)/home/testprog-1.0.0.upkg
+	$(CP) testprog-1.2.1.upkg $(INITFS_DIR)/home/testprog-1.2.1.upkg
 	
 	
 build: build-kernel build-userspace
@@ -313,6 +346,11 @@ qemu-pair-only:
 	$(CD) $(QEMU_DIR)
 	$(SUDO) $(QEMU_DIR)/$(CREATE_DISK_SCRIPT) $(QEMU_PAIR_DIR)/$(DISK_IMG_NAME) $(INITFS_DIR)
 	$(CP) $(QEMU_DIR)/$(RUN_SYSTEM_SCRIPT) $(QEMU_PAIR_DIR)/$(RUN_SYSTEM_SCRIPT)
+	
+docker-image-only:
+	$(MKDIR) -p $(DOCKER_IMAGE_DIR)
+	$(CP) $(DOCKER_DIR)/Dockerfile $(DOCKER_IMAGE_DIR)/Dockerfile
+	$(CP) -r $(INITFS_DIR) $(DOCKER_IMAGE_DIR)/initfs
 	
 qemu-pair: build
 	$(MKDIR) -p $(QEMU_PAIR_DIR)

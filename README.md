@@ -18,9 +18,11 @@ The system consists of apps/libs from these repositories:
 | `zlib`            | Compression library used for data compression                           |
 | `ncurses`         | Terminal handling library for TUIs                                      |
 | `attr`            | Utilities for extended file attributes                                  |
+| `bzip2`           | Compression program and library that uses Burrows–Wheeler algorithm     |
 | `zstd`            | Fast compression algorithm by Facebook                                  |
 | `coreutils`       | GNU core command-line utilities (ls, cp, mv, etc.)                      |
 | `util-linux`      | Essential system utilities (mount, fdisk, etc.)                         |
+| `gcc`             | GNU Compiler Collection                                                 |
 | `bash`            | GNU Bourne Again Shell (default Linux shell)                            |
 
 ---
@@ -43,7 +45,7 @@ The system consists of apps/libs from these repositories:
 | Target             | Description                                                             |
 |--------------------|-------------------------------------------------------------------------|
 | `make qemu-pair`   | Create a disk image and QEMU run script for system emulation            |
-| `make docker-image`| Build a Docker image containing the system          |
+| `make docker-image`| Build a Docker image containing the system                              |
 | `make iso`         | _(Not implemented)_ Build a bootable ISO image                          |
 
 ---
@@ -57,6 +59,11 @@ The system consists of apps/libs from these repositories:
 | `make test`    | Alias for `check`                                              |
 | `make install` | Not supported — use `qemu-pair`, `docker-image`, or `iso` instead |
 
+### Warning
+To build this distro, you need GCC version 14.  
+GCC 15 (the newest at the moment of writing) won't build `kernel` and `bash`.  
+Older versions of GCC have not been tested for building this distro.
+
 ---
 
 ### Examples
@@ -67,8 +74,14 @@ make build
 #### Generate a disk image and run script for QEMU
 make qemu-pair
 
-#### Run distro in qemu
+#### Run distro in QEMU
 build/qemu_pair/run_system.sh
+
+#### Run distro in Docker
+cd build/docker  
+docker-build -t test-linux-distro .  
+docker run -it [--rm] test-linux-distro /bin/bash
+
 
 ---
 
@@ -76,21 +89,22 @@ build/qemu_pair/run_system.sh
 
 | Package(s)                       | Description                                                                 |
 |----------------------------------|-----------------------------------------------------------------------------|
-| **gcc**                          | GNU Compiler Collection                                                    |
-| **make**                         | Build automation tool                                                      |
-| **binutils**                     | Collection of binary tools                                                 |
-| **bison**                        | Parser generator                                                           |
-| **flex**                         | Lexical analyzer generator                                                 |
-| **perl**                         | Required for kernel builds                                                 |
-| **bash**                         | Bourne Again SHell                                                         |
-| **pkg-config**                   | Manage compile and link flags for libraries                                |
-| **gettext**                      | Internationalization and localization                                      |
-| **autoconf**, **automake**, **libtool** | GNU build system tools                                             |
-| **bc**                           | Arbitrary precision calculator language (required for kernel builds)       |
-| **pahole**                       | DWARF debugging information analyzer (optional for kernel builds)          |
-| **util-linux**                   | Collection of essential utilities                                          |
-| **coreutils**                    | Basic file, shell, and text manipulation utilities                         |
-| **gnulib**                       | GNU portability library (used by several GNU projects)                     |
+| **gcc**                          | GNU Compiler Collection                                                     |
+| **make**                         | Build automation tool                                                       |
+| **binutils**                     | Collection of binary tools                                                  |
+| **bison**                        | Parser generator                                                            |
+| **flex**                         | Lexical analyzer generator                                                  |
+| **perl**                         | Required for kernel builds                                                  |
+| **bash**                         | Bourne Again SHell                                                          |
+| **pkg-config**                   | Manage compile and link flags for libraries                                 |
+| **gettext**                      | Internationalization and localization                                       |
+| **autoconf**, **automake**, **libtool** | GNU build system tools                                               |
+| **bc**                           | Arbitrary precision calculator language (required for kernel builds)        |
+| **pahole**                       | DWARF debugging information analyzer (optional for kernel builds)           |
+| **util-linux**                   | Collection of essential utilities                                           |
+| **coreutils**                    | Basic file, shell, and text manipulation utilities                          |
+| **gnulib**                       | GNU portability library (used by several GNU projects)                      |
+| **cargo**                        | Rust's build system                                                         |
 
 
 ### Debian / Ubuntu / Mint
@@ -101,7 +115,7 @@ sudo apt install -y \
   perl bash pkg-config \
   gettext autoconf automake \
   libtool bc dwarves \
-  util-linux coreutils gnulib
+  util-linux coreutils gnulib rustup cargo
 ```
 
 ### Arch Linux / Manjaro / Artix Linux
@@ -111,7 +125,7 @@ sudo pacman -Syu --needed \
   perl bash pkgconf \
   gettext autoconf automake \
   libtool bc dwarves \
-  util-linux coreutils gnulib
+  util-linux coreutils gnulib rustup cargo
 ```
 
 ### Fedora / RHEL / CentOS / Rocky / AlmaLinux
@@ -123,5 +137,5 @@ sudo dnf install -y \
   pkgconf-pkg-config gettext autoconf \
   automake libtool bc \
   dwarves util-linux coreutils \
-  gnulib
+  gnulib rustup cargo
 ```

@@ -12,7 +12,7 @@ fi
 OUTPUT_NAME=$1
 FOLDER=$2
 BLOCK_SIZE=512
-BLOCK_COUNT=2097152
+BLOCK_COUNT=20971520
 REAL_USER_ID=$(ps -o ruid= -p $PPID | cut -d ' ' -f2)
 DEPENDENCIES=("id" "rm" "getent" "mount" "mkfs.ext4" "dd" "cp" "umount")
 DEPS_NOT_SATISFIED=0

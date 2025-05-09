@@ -25,6 +25,7 @@ mkdir -p root
 mkdir -p sbin
 mkdir -p sys
 mkdir -p tmp
+mkdir -p var/lib/upm
 mkdir -p usr/games
 mkdir -p usr/include
 mkdir -p usr/share

@@ -34,3 +34,12 @@
 [submodule "userspace/coreutils"]
 	path = userspace/coreutils
 	url = git://git.sv.gnu.org/coreutils
+[submodule "userspace/gcc"]
+	path = userspace/gcc
+	url = git://gcc.gnu.org/git/gcc.git
+[submodule "userspace/upm"]
+	path = userspace/upm
+	url = git@github.com:Kybernado/upm.git
+[submodule "userspace/bzip2"]
+	path = userspace/bzip2
+	url = git://sourceware.org/git/bzip2.git
