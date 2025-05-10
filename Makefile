@@ -274,7 +274,7 @@ build-userspace:
 	
 	# bash
 	$(CD) $(BASH_BUILD_DIR) && $(BASH_SOURCE_DIR)/configure --prefix=/usr --exec-prefix=/ --disable-rpath --enable-readline
-	$(MAKE) -C $(BASH_BUILD_DIR) CC=/bin/gcc-12
+	$(MAKE) -C $(BASH_BUILD_DIR)
 	$(MAKE) -C $(BASH_BUILD_DIR) install DESTDIR=$(abspath $(BASH_INSTALL_DIR))
 	$(CHMOD) +w $(BASH_INSTALL_DIR)/bin/bashbug
 	$(CP) -r $(BASH_INSTALL_DIR)/* $(INITFS_DIR)/
