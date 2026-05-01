@@ -1,10 +1,10 @@
 # test-linux-distro
-This is repository of a minimalistic Linux distribution, as a proof-of-concept of a distribution framework (not any code, just a document of rules) I'm working on for Bachelor thesis.
+This is repository of a minimalistic Linux distribution, as a proof-of-concept of a distribution framework (not any code, just a document of rules) I'm working on for Diploma thesis.
 
 It tries to showcase that a linux distribution can be divided into **system** part and **user space** part (not to be confused with ring 3 on x86 CPUs), without having any additonal overhead or snadbox, like **Flatpak** or **Snap** have.
 
-It does fullfill this requirement by dividing paths of system components and user installed apps, and having modified `ld-linux.so` linker so it searches also origin path of executed binary.  
-System components go to standard FHS defined paths - `/bin`, `/lib`, `/usr/*`, ... and user installed apps go to `/opt/<appname>`, while keeping their non-system dependencies in their directory.  
+It does fullfill this requirement by dividing paths of system components and user installed apps.  
+System components go to standard FHS defined paths - `/bin`, `/lib`, `/usr/*`, ... and user installed apps go to `/opt/<appname>`, while keeping their non-system dependencies in their directory.
 
 The system consists of apps/libs from these repositories:
 
@@ -24,6 +24,10 @@ The system consists of apps/libs from these repositories:
 | `util-linux`      | Essential system utilities (mount, fdisk, etc.)                         |
 | `gcc`             | GNU Compiler Collection                                                 |
 | `bash`            | GNU Bourne Again Shell (default Linux shell)                            |
+
+It is not yet specified which of these components make the base system contract, and which do not, and are here only for reference purpose only, so the system boots, and can be demonstrated as is.
+
+<u>Note: the linker here is not modified yet, and this system acts like a bootstrap for next work.</u>
 
 ---
 
@@ -58,11 +62,6 @@ The system consists of apps/libs from these repositories:
 | `make check`   | Placeholder for future tests                                   |
 | `make test`    | Alias for `check`                                              |
 | `make install` | Not supported — use `qemu-pair`, `docker-image`, or `iso` instead |
-
-### Warning
-To build this distro, you need GCC version 14.  
-GCC 15 (the newest at the moment of writing) won't build `kernel` and `bash`.  
-Older versions of GCC have not been tested for building this distro.
 
 ---
 
