@@ -1,0 +1,5 @@
+name = "Test Prog"
+internal_name = "testprog"
+developer = "Kybernado"
+version = "1.0.0"
+description = "A test program for my custom distro with modified linker."

@@ -6,6 +6,7 @@ RM = rm
 CHMOD = chmod
 LN = ln
 MV = mv
+TOUCH = touch
 
 QEMU_DIR = qemu
 DOCKER_DIR = docker
@@ -94,20 +95,29 @@ RUN_SYSTEM_SCRIPT = run_system.sh
 
 DISK_IMG_NAME = disk.img
 
-build-kernel:
-	$(MKDIR) -p $(KERNEL_BUILD_DIR)
-	$(MAKE) -C $(KERNEL_SOURCE_DIR) O=$(abspath $(KERNEL_BUILD_DIR)) defconfig
-	$(MAKE) -C $(KERNEL_SOURCE_DIR) O=$(abspath $(KERNEL_BUILD_DIR))
 
-build-userspace:
-	# initfs
+create-initfs:
 	$(MKDIR) -p $(INITFS_DIR)
 	./create_initfs.sh $(INITFS_DIR)
 	
+	$(TOUCH) create-initfs
+
+configure-kernel: create-initfs
+	$(MKDIR) -p $(KERNEL_BUILD_DIR)
+	$(MAKE) -C $(KERNEL_SOURCE_DIR) O=$(abspath $(KERNEL_BUILD_DIR)) defconfig
+	$(KERNEL_SOURCE_DIR)/scripts/config --file $(abspath $(KERNEL_BUILD_DIR))/.config --disable CONFIG_WERROR
+	
+	$(TOUCH) configure-kernel
+
+build-kernel: configure-kernel
+	$(MAKE) -C $(KERNEL_SOURCE_DIR) O=$(abspath $(KERNEL_BUILD_DIR))
+
+
+configure-userspace: create-initfs
 	# env paths setup
 	CPATH=$(abspath $(INITFS_DIR)/usr/include) LIBRARY_PATH=$(abspath $(INITFS_DIR)/lib)
 	
-	# build and install dirs for 3rd party components
+	# dirs creating
 	$(MKDIR) -p $(USERSPACE_BUILD_DIR)
 	$(MKDIR) -p $(SINIT_BUILD_DIR) $(SINIT_INSTALL_DIR)
 	$(MKDIR) -p $(GLIBC_BUILD_DIR) $(GLIBC_INSTALL_DIR)
@@ -126,6 +136,36 @@ build-userspace:
 	$(MKDIR) -p $(UPM_BUILD_DIR) $(UPM_INSTALL_DIR)
 	$(MKDIR) -p $(TESTPROG_BUILD_DIR) $(TESTPROG_INSTALL_DIR)
 	
+	$(CD) $(GLIBC_BUILD_DIR) && $(GLIBC_SOURCE_DIR)/configure --prefix=/
+	
+	$(CD) $(READLINE_BUILD_DIR) && $(READLINE_SOURCE_DIR)/configure --prefix=/
+	
+	$(CD) $(ZLIB_BUILD_DIR) && $(ZLIB_SOURCE_DIR)/configure --prefix=/
+	
+	$(CD) $(NCURSES_BUILD_DIR) && $(NCURSES_SOURCE_DIR)/configure --prefix=/usr --exec-prefix=/ --without-ada --with-shared --without-debug --enable-widec --with-versioned-syms --with-shlib-version=rel --without-cxx
+	
+	$(CD) $(ATTR_SOURCE_DIR) && ./autogen.sh
+	$(CD) $(ATTR_BUILD_DIR) && $(ATTR_SOURCE_DIR)/configure --prefix=/
+	
+	$(CD) $(ACL_SOURCE_DIR) && ./autogen.sh
+	$(CD) $(ACL_BUILD_DIR) && $(ACL_SOURCE_DIR)/configure --prefix=/
+	
+	$(CD) $(BASH_BUILD_DIR) && $(BASH_SOURCE_DIR)/configure --prefix=/usr --exec-prefix=/ --disable-rpath --enable-readline
+	
+	$(CD) $(COREUTILS_SOURCE_DIR) && ./bootstrap
+	$(CD) $(COREUTILS_BUILD_DIR) && $(COREUTILS_SOURCE_DIR)/configure --prefix=/
+	
+	$(CD) $(UTILLINUX_SOURCE_DIR) && ./autogen.sh
+	$(CD) $(UTILLINUX_BUILD_DIR) && $(UTILLINUX_SOURCE_DIR)/configure --prefix=/ --disable-makeinstall-chown --disable-makeinstall-setuid
+	
+	./gcc_change_path_for_x86_64.sh $(GCC_SOURCE_DIR)
+	$(CD) $(GCC_BUILD_DIR) && $(GCC_SOURCE_DIR)/configure --prefix=/usr --exec-prefix=/ --disable-multilib --with-system-zlib --enable-default-pie --enable-default-ssp --enable-host-pie --disable-fixincludes --enable-languages=c,c++,fortran,go,objc,obj-c++,m2
+	
+	$(TOUCH) configure-userspace
+
+build-userspace: configure-userspace
+	# env paths setup
+	CPATH=$(abspath $(INITFS_DIR)/usr/include) LIBRARY_PATH=$(abspath $(INITFS_DIR)/lib)
 	
 	# sinit
 	$(CP) -r $(SINIT_SOURCE_DIR)/* $(SINIT_BUILD_DIR)/
@@ -142,7 +182,6 @@ build-userspace:
 	$(CP) -r $(SINIT_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# glibc and ld-linux.so
-	$(CD) $(GLIBC_BUILD_DIR) && $(GLIBC_SOURCE_DIR)/configure --prefix=/
 	$(MAKE) -C $(GLIBC_BUILD_DIR)
 	$(MAKE) -C $(GLIBC_BUILD_DIR) install DESTDIR=$(abspath $(GLIBC_INSTALL_DIR))
 	$(MKDIR) -p $(GLIBC_INSTALL_DIR)/usr
@@ -180,7 +219,6 @@ build-userspace:
 	$(CP) -r $(BZIP2_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# readline
-	$(CD) $(READLINE_BUILD_DIR) && $(READLINE_SOURCE_DIR)/configure --prefix=/
 	$(MAKE) -C $(READLINE_BUILD_DIR)
 	$(MAKE) -C $(READLINE_BUILD_DIR) install DESTDIR=$(abspath $(READLINE_INSTALL_DIR))
 	$(MKDIR) -p $(READLINE_INSTALL_DIR)/usr
@@ -195,7 +233,6 @@ build-userspace:
 	$(CP) -r $(READLINE_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# zlib
-	$(CD) $(ZLIB_BUILD_DIR) && $(ZLIB_SOURCE_DIR)/configure --prefix=/
 	$(MAKE) -C $(ZLIB_BUILD_DIR)
 	$(MAKE) -C $(ZLIB_BUILD_DIR) install DESTDIR=$(abspath $(ZLIB_INSTALL_DIR))
 	$(MKDIR) -p $(ZLIB_INSTALL_DIR)/usr
@@ -210,14 +247,11 @@ build-userspace:
 	$(CP) -r $(ZLIB_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# ncurses
-	$(CD) $(NCURSES_BUILD_DIR) && $(NCURSES_SOURCE_DIR)/configure --prefix=/usr --exec-prefix=/ --without-ada --with-shared --without-debug --enable-widec --with-versioned-syms --with-shlib-version=rel --without-cxx
 	$(MAKE) -C $(NCURSES_BUILD_DIR) all
 	$(MAKE) -C $(NCURSES_BUILD_DIR) install DESTDIR=$(abspath $(NCURSES_INSTALL_DIR))
 	$(CP) -r $(NCURSES_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# attr
-	$(CD) $(ATTR_SOURCE_DIR) && ./autogen.sh
-	$(CD) $(ATTR_BUILD_DIR) && $(ATTR_SOURCE_DIR)/configure --prefix=/
 	$(MAKE) -C $(ATTR_BUILD_DIR)
 	$(MAKE) -C $(ATTR_BUILD_DIR) install DESTDIR=$(abspath $(ATTR_INSTALL_DIR))
 	$(MKDIR) -p $(ATTR_INSTALL_DIR)/usr
@@ -232,8 +266,6 @@ build-userspace:
 	$(CP) -r $(ATTR_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# acl
-	$(CD) $(ACL_SOURCE_DIR) && ./autogen.sh
-	$(CD) $(ACL_BUILD_DIR) && $(ACL_SOURCE_DIR)/configure --prefix=/
 	$(MAKE) -C $(ACL_BUILD_DIR)
 	$(MAKE) -C $(ACL_BUILD_DIR) install DESTDIR=$(abspath $(ACL_INSTALL_DIR))
 	$(MKDIR) -p $(ACL_INSTALL_DIR)/usr
@@ -273,15 +305,12 @@ build-userspace:
 	$(CP) -r $(LIBCAP_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# bash
-	$(CD) $(BASH_BUILD_DIR) && $(BASH_SOURCE_DIR)/configure --prefix=/usr --exec-prefix=/ --disable-rpath --enable-readline
 	$(MAKE) -C $(BASH_BUILD_DIR)
 	$(MAKE) -C $(BASH_BUILD_DIR) install DESTDIR=$(abspath $(BASH_INSTALL_DIR))
 	$(CHMOD) +w $(BASH_INSTALL_DIR)/bin/bashbug
 	$(CP) -r $(BASH_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# coreutils
-	$(CD) $(COREUTILS_SOURCE_DIR) && ./bootstrap
-	$(CD) $(COREUTILS_BUILD_DIR) && $(COREUTILS_SOURCE_DIR)/configure --prefix=/
 	$(MAKE) -C $(COREUTILS_BUILD_DIR)
 	$(MAKE) -C $(COREUTILS_BUILD_DIR) install DESTDIR=$(abspath $(COREUTILS_INSTALL_DIR))
 	$(MKDIR) -p $(COREUTILS_INSTALL_DIR)/usr
@@ -296,8 +325,6 @@ build-userspace:
 	$(CP) -r $(COREUTILS_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# util-linux
-	$(CD) $(UTILLINUX_SOURCE_DIR) && ./autogen.sh
-	$(CD) $(UTILLINUX_BUILD_DIR) && $(UTILLINUX_SOURCE_DIR)/configure --prefix=/ --disable-makeinstall-chown --disable-makeinstall-setuid
 	$(MAKE) -C $(UTILLINUX_BUILD_DIR)
 	$(MAKE) -C $(UTILLINUX_BUILD_DIR) install DESTDIR=$(abspath $(UTILLINUX_INSTALL_DIR))
 	if [ -d "$(UTILLINUX_INSTALL_DIR)/usr/include" ]; then \
@@ -313,11 +340,9 @@ build-userspace:
 	$(CP) -r $(UTILLINUX_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# gcc
-	./gcc_change_path_for_x86_64.sh $(GCC_SOURCE_DIR)
-	$(CD) $(GCC_BUILD_DIR) && $(GCC_SOURCE_DIR)/configure --prefix=/usr --exec-prefix=/ --disable-multilib --with-system-zlib --enable-default-pie --enable-default-ssp --enable-host-pie --disable-fixincludes --enable-languages=c,c++,fortran,go,objc,obj-c++,m2
-	$(MAKE) -C $(GCC_BUILD_DIR)
-	$(MAKE) -C $(GCC_BUILD_DIR) install DESTDIR=$(abspath $(GCC_INSTALL_DIR))
-	$(CP) -r $(GCC_INSTALL_DIR)/* $(INITFS_DIR)/
+	# $(MAKE) -C $(GCC_BUILD_DIR) WERROR=0
+	# $(MAKE) -C $(GCC_BUILD_DIR) install DESTDIR=$(abspath $(GCC_INSTALL_DIR))
+	# $(CP) -r $(GCC_INSTALL_DIR)/* $(INITFS_DIR)/
 	
 	# upm
 	$(CP) -r $(UPM_SOURCE_DIR)/* $(UPM_BUILD_DIR)/
@@ -372,6 +397,7 @@ all: docker-image qemu-pair
 clean:
 	$(MAKE) -C $(KERNEL_SOURCE_DIR) clean
 	$(RM) -rf $(BUILD_DIR)
+	$(RM) configure-userspace configure-kernel create-initfs
 	
 
 check test:

@@ -1,0 +1,33 @@
+[binaries]
+binaries = [
+  "prog",
+]
+links = [
+  "prog"
+]
+
+[hooks]
+
+  [hooks.install]
+  pre = [
+    {name = "pre_install.sh"}
+  ]
+  post = [
+    {name = "post_install.sh"}
+  ]
+
+  [hooks.remove]
+  pre = [
+    {name = "pre_remove.sh"}
+  ]
+  post = [
+    {name = "post_remove.sh"}
+  ]
+
+  [hooks.update]
+  pre = [
+    {name = "pre_update.sh"}
+  ]
+  post = [
+    {name = "post_update.sh"}
+  ]

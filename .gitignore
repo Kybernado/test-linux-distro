@@ -1,1 +1,4 @@
 build/
+configure-kernel
+configure-userspace
+create-initfs
